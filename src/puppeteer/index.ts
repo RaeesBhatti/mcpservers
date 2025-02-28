@@ -98,6 +98,16 @@ const TOOLS: Tool[] = [
       required: ["script"],
     },
   },
+  {
+    name: "puppeteer_get_console_logs",
+    description: "Get the browser console logs",
+    inputSchema: {
+      type: "object",
+      properties: {
+        limit: { type: "number", description: "Maximum number of logs to return (default: all)" },
+      },
+    },
+  },
 ];
 
 // Global state
@@ -311,6 +321,28 @@ async function handleToolCall(name: string, args: any): Promise<CallToolResult> 
           content: [{
             type: "text",
             text: `Script execution failed: ${(error as Error).message}`,
+          }],
+          isError: true,
+        };
+      }
+    
+    case "puppeteer_get_console_logs":
+      try {
+        const limit = args.limit ? parseInt(args.limit, 10) : consoleLogs.length;
+        const logs = consoleLogs.slice(-limit);
+        
+        return {
+          content: [{
+            type: "text",
+            text: logs.length > 0 ? logs.join('\n') : "No console logs available",
+          }],
+          isError: false,
+        };
+      } catch (error) {
+        return {
+          content: [{
+            type: "text",
+            text: `Failed to get console logs: ${(error as Error).message}`,
           }],
           isError: true,
         };
