@@ -132,6 +132,16 @@ async function ensureBrowser() {
         params: { uri: "console://logs" },
       });
     });
+    
+    // Clear console logs when navigation starts
+    page.on("framenavigated", (frame) => {
+      if (frame !== page?.mainFrame()) return;
+      consoleLogs.length = 0;
+      server.notification({
+        method: "notifications/resources/updated",
+        params: { uri: "console://logs" },
+      });
+    });
   }
   return page!;
 }
